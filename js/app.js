@@ -25,37 +25,34 @@ var Location = function(data) {
   this.name = ko.observable(data.name);
   this.foursquare_id = ko.observable(data.foursquare_id);
 
-  this.get_fsq = function(foursquare_id) {
-    var today = new Date();
-    var dd = today.getDate();
-    var mm = today.getMonth()+1; //January is 0!
-    var yyyy = today.getFullYear();
+  var today = new Date();
+  var dd = today.getDate();
+  var mm = today.getMonth()+1; //January is 0!
+  var yyyy = today.getFullYear();
 
-    if(dd<10) {
-        dd='0'+dd
-    };
-
-    if(mm<10) {
-        mm='0'+mm
-    };
-
-    today = yyyy + mm + dd;
-
-    search_url = "https://api.foursquare.com/v2/venues/";
-    auth_keys = "/?&client_id=LMZLEPB1CQGFTBSXMERFV4IFDNNZABUOWABWHGYU2L3NRIYQ&client_secret=UQLPF3LMC0K0GF2X4J30DKTTZ4LE04ESQXHE4RJCQGDMQ12H&v=";
-    query_url = search_url + foursquare_id + auth_keys + today
-
-    $.getJSON(query_url, function(data) {
-      this.phone = data.contact.formattedPhone
-      this.address = data.location.address
-      this.lat = data.location.lat
-      this.long = data.location.long
-      this.description = data.description
-      this.rating = data.rating
-    }).error(function(e){
-      this.error = "Could not load 4sq data!"
-    });
+  if(dd<10) {
+      dd='0'+dd
   };
+
+  if(mm<10) {
+      mm='0'+mm
+  };
+
+  today = yyyy + mm + dd;
+
+  search_url = "https://api.foursquare.com/v2/venues/";
+  auth_keys = "/?&client_id=LMZLEPB1CQGFTBSXMERFV4IFDNNZABUOWABWHGYU2L3NRIYQ&client_secret=UQLPF3LMC0K0GF2X4J30DKTTZ4LE04ESQXHE4RJCQGDMQ12H&v=";
+  query_url = search_url + this.foursquare_id() + auth_keys + today
+
+  var results = $.getJSON(query_url);
+  console.log(results);
+  var v_data = results.response.venue;
+  this.phone = ko.observable(v_data.contact.formattedPhone);
+  this.address = ko.observable(results.location.address);
+  this.lat = ko.observable(results.location.lat);
+  this.long = ko.observable(results.location.long);
+  this.description = ko.observable(results.description);
+  this.rating = ko.observable(results.rating);
 };
 
 var ViewModel = function() {
