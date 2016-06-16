@@ -45,13 +45,26 @@ var Location = function(data) {
   // the result of which is put into a function that takes the JSON data as an argument
   // then you set the ko variables to the data.whatever_you_need
   var results = [];
-  $.getJSON(query_url, function(data){
+  this.foursquare = ko.observableArray(results)
+  $.ajax({
+    url: query_url,
+    dataType: 'json',
+  })
+  .done(function(json) {
+    results.push(json.response.venue)
+  })
+  .fail(function( xhr, status, errorThrown ) {
+    alert( "Sorry, there was a problem!" );
+    console.log( "Error: " + errorThrown );
+    console.log( "Status: " + status );
+    console.dir( xhr );
+  });
     //set data to the venue (allows you to remove v_data)
-    data = data.response.venue;
-    // results.push(data);
-    results.lat = data.location.lat
-    results.long = data.location.long
-    results.rating = data.rating
+    // data = data.response.venue;
+    // // results.push(data);
+    // results.lat = data.location.lat
+    // results.long = data.location.long
+    // results.rating = data.rating
 
     // this.phone = ko.observable(data.formattedPhone);
     // this.address = ko.observable(data.location.address);
@@ -60,15 +73,15 @@ var Location = function(data) {
     // this.description = ko.observable(data.description);
     // this.rating = ko.observable(data.rating);
     // return data;
-    console.log(data.rating);
-  });
+    // console.log(data.rating);
+  console.log(self.foursquare())
 
-  this.lat = ko.observable(results.lat);
-  this.long = ko.observable(results.long);
-  console.log(results.lat + " - " + results.long);
+  // this.lat = ko.observable(results.lat);
+  // this.long = ko.observable(results.long);
+  // console.log(results.lat + " - " + results.long);
 
   this.ratedName = ko.computed(function() {
-    return self.name() + " - " + results.rating;
+    return self.name() + " - " + self.foursquare.rating;
   });
 };
 
