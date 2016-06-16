@@ -16,6 +16,8 @@ var initialLocations = [{
 }];
 
 var Location = function(data) {
+  var self = this;
+
   this.name = ko.observable(data.name);
   this.foursquare_id = ko.observable(data.foursquare_id);
 
@@ -37,21 +39,36 @@ var Location = function(data) {
   var search_url = "https://api.foursquare.com/v2/venues/";
   var auth_keys = "/?&client_id=LMZLEPB1CQGFTBSXMERFV4IFDNNZABUOWABWHGYU2L3NRIYQ&client_secret=UQLPF3LMC0K0GF2X4J30DKTTZ4LE04ESQXHE4RJCQGDMQ12H&v=";
   var query_url = search_url + this.foursquare_id() + auth_keys + today;
-
+  console.log(query_url)
 
   // Results is initialized as a getJSON request,
   // the result of which is put into a function that takes the JSON data as an argument
   // then you set the ko variables to the data.whatever_you_need
-  var results = $.getJSON(query_url, function(data){
+  var results = [];
+  $.getJSON(query_url, function(data){
     //set data to the venue (allows you to remove v_data)
     data = data.response.venue;
-    this.phone = ko.observable(data.formattedPhone);
-    this.address = ko.observable(data.location.address);
-    this.lat = ko.observable(data.location.lat);
-    this.long = ko.observable(data.location.long);
-    this.description = ko.observable(data.description);
-    this.rating = ko.observable(data.rating);
-    console.log(data);
+    // results.push(data);
+    results.lat = data.location.lat
+    results.long = data.location.long
+    results.rating = data.rating
+
+    // this.phone = ko.observable(data.formattedPhone);
+    // this.address = ko.observable(data.location.address);
+    // this.lat = ko.observable(data.location.lat);
+    // this.long = ko.observable(data.location.long);
+    // this.description = ko.observable(data.description);
+    // this.rating = ko.observable(data.rating);
+    // return data;
+    console.log(data.rating);
+  });
+
+  this.lat = ko.observable(results.lat);
+  this.long = ko.observable(results.long);
+  console.log(results.lat + " - " + results.long);
+
+  this.ratedName = ko.computed(function() {
+    return self.name() + " - " + results.rating;
   });
 };
 
@@ -71,4 +88,4 @@ var ViewModel = function() {
   };
 };
 
-ko.applyBindings(new ViewModel());
+ko.applyBindings(ViewModel);
