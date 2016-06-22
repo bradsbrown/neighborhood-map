@@ -16,7 +16,7 @@ n<!DOCTYPE HTML>
         <ul class="sidebar-nav">
           <li class="sidebar-brand">Neighborhood HotSpots</li>
           <span data-bind="foreach: loc_list">
-            <li><span data-bind="text: name"></span></li>
+            <li><a href="#" data-bind="click: changeLoc"><span data-bind="text: formattedName"></span></a></li>
           </span>
         </ul>
       </div>
@@ -27,9 +27,19 @@ n<!DOCTYPE HTML>
               <a href="#menu-toggle" class="btn btn-default" id="menu-toggle">Menu</a>
             </div>
           </div>
-            <div class="container-map">
-              <div id="map"></div>
+          <div class="row" data-bind="with: currentLoc">
+            <div class="col-md-6">
+              <h3><span  data-bind="text: name"></span> - <a data-bind="attr: { href: shorturl }">Link</a></h3>
             </div>
+            <div class="col-md-6">
+              <span data-bind="text: description"></span>
+            </div>
+          </div>
+          <div class="row>"
+            <div class="row container-map">
+              <div class="container-md-12" id="map"></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
