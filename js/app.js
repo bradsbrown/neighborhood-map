@@ -38,7 +38,7 @@ var initialLocations = [{
 var Location = function(data) {
   var self = this;
 
-  // define hard-coded data as KO observables
+  // define data as KO observables
   this.name = ko.observable(data.name);
   this.foursquare_id = ko.observable(data.foursquare_id);
   this.rating = ko.observable(data.rating);
@@ -65,7 +65,7 @@ var ViewModel = function() {
 
   this.loc_list = ko.observableArray([]);
 
-  initialLocations.forEach(function setup_item(locItem) {
+  initialLocations.forEach(function(locItem) {
     // define query url for location
     var search_url = "https://api.foursquare.com/v2/venues/";
     var auth_keys = "/?&client_id=LMZLEPB1CQGFTBSXMERFV4IFDNNZABUOWABWHGYU2L3NRIYQ&client_secret=UQLPF3LMC0K0GF2X4J30DKTTZ4LE04ESQXHE4RJCQGDMQ12H&v=";
@@ -73,31 +73,29 @@ var ViewModel = function() {
 
     // pull 4sq data and insert into an observableArray
     // TODO - GET THIS WORKING
-    results = []
-    $.ajax({
-      url: query_url,
-      dataType: 'json',
-    })
-    .done(console.log("Retrieval complete"))
-    .success(function(json) {
-      // TODO - remove these console.log statements when testing complete
-      console.log(json.response.venue);
-      data = json.response.venue;
-      console.log(data.rating)
-      locItem.rating = data.rating;
-      locItem.lat = data.location.lat;
-      locItem.long = data.location.long;
-      locItem.shorturl = data.shortUrl;
-      console.log(locItem.rating);
-      self.loc_list.push(new Location(locItem));
-      setTimeout(setup_item, 120000);
-    })
-    .fail(function( xhr, status, errorThrown ) {
-      alert( "Sorry, there was a problem!" );
-      console.log( "Error: " + errorThrown );
-      console.log( "Status: " + status );
-      console.dir( xhr );
-    });
+    function load_4sq_and_put(locItem) {
+      $.ajax({
+        url: query_url,
+        dataType: 'json',
+      })
+      .success(function(json) {
+        // TODO - remove these console.log statements when testing complete
+        console.log(json.response.venue);
+        data = json.response.venue;
+        locItem.rating = data.rating;
+        locItem.lat = data.location.lat;
+        locItem.long = data.location.long;
+        locItem.shorturl = data.shortUrl;
+        console.log(locItem.rating);
+        self.loc_list.push(new Location(locItem));
+      })
+      .fail(function( xhr, status, errorThrown ) {
+        alert( "Sorry, there was a problem!" );
+        console.log( "Error: " + errorThrown );
+        console.log( "Status: " + status );
+        console.dir( xhr );
+      })};
+    load_4sq_and_put(locItem);
   });
 
   this.currentLoc = ko.observable(this.loc_list()[0]);
