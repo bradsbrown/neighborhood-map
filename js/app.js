@@ -164,8 +164,12 @@ ko.bindingHandlers.mapMarker = {
   update: function(element, valueAccessor, allBindingsAccessor, ViewModel) {
     value = valueAccessor();
     console.log(value.latitude());
+    if (value.latitude() != "Undefined" ) {
     latLng = new google.maps.LatLng(value.latitude(), value.longitude());
     marker.setPosition(latLng);
+  } else {
+    marker.setPosition({lat: 0.0, lng: 0.0});
+  }
   }
 };
 
