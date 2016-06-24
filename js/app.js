@@ -64,8 +64,7 @@ today = yyyy + mm + dd;
 
 
 var Location = function(data) {
-  var self = this;
-  var vm = this;
+  var locself = this;
 
   // define data as KO observables
   this.name = ko.observable(data.name);
@@ -76,16 +75,16 @@ var Location = function(data) {
   this.shorturl = ko.observable(data.shorturl);
   this.description = ko.observable(data.description);
   this.formattedName = ko.computed(function() {
-    return loc_list.indexOf(self) + " - " + self.name() + " - " + self.rating()
+    return loc_list.indexOf(locself) + " - " + locself.name() + " - " + locself.rating()
   });
   this.latLng = ko.computed(function() {
-    return "{ lat: " + self.lat() + ", lng: " + self.lng() +" }"
+    return "{ lat: " + locself.lat() + ", lng: " + locself.lng() +" }"
   })
 
   // define query url for location
   var search_url = "https://api.foursquare.com/v2/venues/";
   var auth_keys = "/?&client_id=LMZLEPB1CQGFTBSXMERFV4IFDNNZABUOWABWHGYU2L3NRIYQ&client_secret=UQLPF3LMC0K0GF2X4J30DKTTZ4LE04ESQXHE4RJCQGDMQ12H&v=";
-  var query_url = search_url + self.foursquare_id() + auth_keys + today;
+  var query_url = search_url + locself.foursquare_id() + auth_keys + today;
 
   // pull 4sq data and insert into an observableArray
   function load_4sq() {
@@ -94,15 +93,12 @@ var Location = function(data) {
       dataType: 'json',
     })
     .success(function(json) {
-      // TODO - remove these console.log statements when testing complete
-      console.log(json.response.venue);
       data = json.response.venue;
-      self.rating(data.rating);
-      self.lat(data.location.lat);
-      self.lng(data.location.lng);
-      self.shorturl(data.shortUrl);
-      self.description(data.description);
-      console.log(data.rating);
+      locself.rating(data.rating);
+      locself.lat(data.location.lat);
+      locself.lng(data.location.lng);
+      locself.shorturl(data.shortUrl);
+      locself.description(data.description);
     })
     .fail(function( xhr, status, errorThrown ) {
       alert( "Sorry, there was a problem!" );
@@ -115,6 +111,8 @@ var Location = function(data) {
 
 var ViewModel = function() {
   var self = this;
+  var map;
+  var markers = ko.observable([]);
 
   this.loc_list = ko.observableArray([]);
 
@@ -144,10 +142,62 @@ var ViewModel = function() {
         return loc.name().toLowerCase().indexOf(search) >= 0;
     });
   });
+
+
+  function initMap() {
+    map = new google.maps.Map(document.getElementById('map'), {
+      center: {lat: 30.5356595, lng: -97.6264142},
+      zoom: 14
+    })};
+
+  // Adds a marker to the map and push to the array.
+  function addMarker(location) {
+    var marker = new google.maps.Marker({
+      position: location,
+      map: map
+    });
+    markers().push(marker);
+  };
+
+  // Sets the map on all markers in the array.
+  function setMapOnAll(map) {
+    for (var i = 0; i < markers.length; i++) {
+      markers[i].setMap(map);
+    }
+  };
+
+  // Removes the markers from the map, but keeps them in the array.
+  function clearMarkers() {
+    setMapOnAll(null);
+  };
+
+  // Shows any markers currently in the array.
+  function showMarkers() {
+    setMapOnAll(map);
+  };
+
+  // Deletes all markers in the array by removing references to them.
+  function deleteMarkers() {
+    clearMarkers();
+    markers = [];
+  }
+
+  // this.filterLocs().forEach(function(loc) {
+  //   var
+  //     ll = new google.maps.LatLng(loc.lat(), loc.lng());
+  //     title = loc.name()
+  //     marker = new google.maps.Marker({
+  //       position: ll,
+  //       map: map,
+  //       title: title,
+  //       animation: google.maps.Animation.DROP
+  //   });
+  //   markers().push(marker);
+  // });
 };
 
 ko.bindingHandlers.mapMarker = {
-  init: function(element, valueAccessor, allBindingsAccessor, ViewModel) {
+  init: function(element, valueAccessor, allBindings) {
     var
       value = valueAccessor();
       map = map;
@@ -161,16 +211,14 @@ ko.bindingHandlers.mapMarker = {
     });
     marker.addListener('click', toggleBounce);
   },
-  update: function(element, valueAccessor, allBindingsAccessor, ViewModel) {
+  update: function(element, valueAccessor, allBindings) {
     value = valueAccessor();
-    console.log(value.latitude());
-    if (value.latitude() != "Undefined" ) {
+    if (value.name()) {
     latLng = new google.maps.LatLng(value.latitude(), value.longitude());
     marker.setPosition(latLng);
   } else {
-    marker.setPosition({lat: 0.0, lng: 0.0});
+    console.log('item removed')
+    marker.setMap(null);
   }
-  }
+  },
 };
-
-ko.applyBindings(ViewModel);
