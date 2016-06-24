@@ -11,7 +11,7 @@ var initialLocations = [{
   foursquare_id: "4a0c4c4af964a5201a751fe3",
   rating: "",
   lat: "",
-  long: "",
+  lng: "",
   shorturl: "",
   description: ""
 }, {
@@ -19,7 +19,7 @@ var initialLocations = [{
   foursquare_id: "4b155039f964a52026b023e3",
   rating: "",
   lat: "",
-  long: "",
+  lng: "",
   shorturl: "",
   description: ""
 }, {
@@ -27,7 +27,7 @@ var initialLocations = [{
   foursquare_id: "4ae62210f964a520f4a421e3",
   rating: "",
   lat: "",
-  long: "",
+  lng: "",
   shorturl: "",
   description: ""
 }, {
@@ -35,7 +35,7 @@ var initialLocations = [{
   foursquare_id: "4be5a1abcf200f474f75133c",
   rating: "",
   lat: "",
-  long: "",
+  lng: "",
   shorturl: "",
   description: ""
 }, {
@@ -43,10 +43,11 @@ var initialLocations = [{
   foursquare_id: "518d264f498e1fbf0b642c75",
   rating: "",
   lat: "",
-  long: "",
+  lng: "",
   shorturl: "",
   description: ""
 }];
+
 
 // function to create formatted date for unique 4sq identifier
 var today = new Date();
@@ -61,39 +62,6 @@ if (mm < 10) {
 }
 today = yyyy + mm + dd;
 
-// initialLocations.forEach(function(locItem) {
-//   var index = findWithAttr(initialLocations, "name", locItem.name)
-//   console.log("index = " + index)
-//   // define query url for location
-//   var search_url = "https://api.foursquare.com/v2/venues/";
-//   var auth_keys = "/?&client_id=LMZLEPB1CQGFTBSXMERFV4IFDNNZABUOWABWHGYU2L3NRIYQ&client_secret=UQLPF3LMC0K0GF2X4J30DKTTZ4LE04ESQXHE4RJCQGDMQ12H&v=";
-//   var query_url = search_url + locItem.foursquare_id + auth_keys + today;
-//
-//   // pull 4sq data and insert into an observableArray
-//   // TODO - GET THIS WORKING
-//   function load_4sq(locItem) {
-//     $.ajax({
-//       url: query_url,
-//       dataType: 'json',
-//     })
-//     .success(function(json) {
-//       // TODO - remove these console.log statements when testing complete
-//       console.log(json.response.venue);
-//       data = json.response.venue;
-//       initialLocations[index].rating = data.rating;
-//       initialLocations[index].lat = data.location.lat;
-//       initialLocations[index].long = data.location.long;
-//       initialLocations[index].shorturl = data.shortUrl;
-//       console.log(initialLocations[index].rating);
-//     })
-//     .fail(function( xhr, status, errorThrown ) {
-//       alert( "Sorry, there was a problem!" );
-//       console.log( "Error: " + errorThrown );
-//       console.log( "Status: " + status );
-//       console.dir( xhr );
-//     })};
-//   load_4sq(locItem);
-// });
 
 var Location = function(data) {
   var self = this;
@@ -104,11 +72,14 @@ var Location = function(data) {
   this.foursquare_id = ko.observable(data.foursquare_id);
   this.rating = ko.observable(data.rating);
   this.lat = ko.observable(data.lat);
-  this.long = ko.observable(data.long);
-  this.shorturl = ko.observable(data.shorturl)
-  this.description = ko.observable(data.description)
+  this.lng = ko.observable(data.lng);
+  this.shorturl = ko.observable(data.shorturl);
+  this.description = ko.observable(data.description);
   this.formattedName = ko.computed(function() {
-    return self.name() + " - " + self.rating()
+    return loc_list.indexOf(self) + " - " + self.name() + " - " + self.rating()
+  });
+  this.latLng = ko.computed(function() {
+    return "{ lat: " + self.lat() + ", lng: " + self.lng() +" }"
   })
 
   // define query url for location
@@ -117,7 +88,6 @@ var Location = function(data) {
   var query_url = search_url + self.foursquare_id() + auth_keys + today;
 
   // pull 4sq data and insert into an observableArray
-  // TODO - GET THIS WORKING
   function load_4sq() {
     $.ajax({
       url: query_url,
@@ -129,7 +99,7 @@ var Location = function(data) {
       data = json.response.venue;
       self.rating(data.rating);
       self.lat(data.location.lat);
-      self.long(data.location.long);
+      self.lng(data.location.lng);
       self.shorturl(data.shortUrl);
       self.description(data.description);
       console.log(data.rating);
@@ -165,6 +135,38 @@ var ViewModel = function() {
   this.changeLoc = function(clickedLoc) {
     self.currentLoc(clickedLoc);
   };
+
+  this.query = ko.observable('');
+
+  this.filterLocs = ko.computed(function () {
+    var search = self.query().toLowerCase();
+    return ko.utils.arrayFilter(self.loc_list(), function (loc) {
+        return loc.name().toLowerCase().indexOf(search) >= 0;
+    });
+  });
+};
+
+ko.bindingHandlers.mapMarker = {
+  init: function(element, valueAccessor, allBindingsAccessor, ViewModel) {
+    var
+      value = valueAccessor();
+      map = map;
+      name = value.name()
+      latLng = new google.maps.LatLng(value.latitude(), value.longitude());
+      marker = new google.maps.Marker({
+        position: latLng,
+        map: map,
+        title: name,
+        animation: google.maps.Animation.DROP
+    });
+    marker.addListener('click', toggleBounce);
+  },
+  update: function(element, valueAccessor, allBindingsAccessor, ViewModel) {
+    value = valueAccessor();
+    console.log(value.latitude());
+    latLng = new google.maps.LatLng(value.latitude(), value.longitude());
+    marker.setPosition(latLng);
+  }
 };
 
 ko.applyBindings(ViewModel);
