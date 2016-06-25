@@ -99,7 +99,8 @@
       clearMarkers();
       markers = [];
     }
-    function makeBounce(marker) {
+    function makeBounce(index) {
+      marker = markers[index];
       marker.setAnimation(google.maps.Animation.BOUNCE);
       setTimeout(function(){ marker.setAnimation(null); }, 750);
     }
@@ -114,6 +115,5 @@
   <script src="js/knockout-3.4.0.js"></script>
   <script src="js/app.js"></script>
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC0lYW2HP4ddQ1jaO_7JlJ0B_CdOp_On6o&callback=initMap"></script>
-
 
 </html>

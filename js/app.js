@@ -75,7 +75,7 @@ var Location = function(data) {
   this.shorturl = ko.observable(data.shorturl);
   this.description = ko.observable(data.description);
   this.formattedName = ko.computed(function() {
-    return loc_list.indexOf(locself) + " - " + locself.name() + " - " + locself.rating()
+    return (loc_list.indexOf(locself) + 1) + " - " + locself.name() + " - " + locself.rating()
   });
   this.latLng = ko.computed(function() {
     return "{ lat: " + locself.lat() + ", lng: " + locself.lng() +" }"
@@ -86,7 +86,7 @@ var Location = function(data) {
   var auth_keys = "/?&client_id=LMZLEPB1CQGFTBSXMERFV4IFDNNZABUOWABWHGYU2L3NRIYQ&client_secret=UQLPF3LMC0K0GF2X4J30DKTTZ4LE04ESQXHE4RJCQGDMQ12H&v=";
   var query_url = search_url + locself.foursquare_id() + auth_keys + today;
 
-  // pull 4sq data and insert into an observableArray
+  // pull 4sq data and inserts desired data as Location properties
   function load_4sq() {
     $.ajax({
       url: query_url,
@@ -111,15 +111,15 @@ var Location = function(data) {
 
 var ViewModel = function() {
   var self = this;
-  var map;
-  var markers = ko.observable([]);
 
+  // list array to hold all info for locations
   this.loc_list = ko.observableArray([]);
 
+  // upon loc_list insertion, called to set currentLoc to first item
   function updateCurrent() {this.currentLoc = ko.observable(this.loc_list()[0])}
 
+  // pulls hard-coded data from initialLocations, drops into loc_list
   var initsProcessed = 0
-
   initialLocations.forEach(function(locItem) {
     self.loc_list.push(new Location(locItem));
     initsProcessed++;
@@ -128,14 +128,27 @@ var ViewModel = function() {
     };
   });
 
+  //holds state for currently selected loc
   this.currentLoc = ko.observable(this.loc_list()[0]);
 
+  // on click on sidebar element, changes currentLoc and bounces map pin
   this.changeLoc = function(clickedLoc) {
     self.currentLoc(clickedLoc);
+    makeBounce(filterIndex(clickedLoc.name()));
   };
 
+  function filterIndex(name) {
+    for (i = 0; i < filterLocs().length; i++ ) {
+      if (filterLocs()[i].name() === name) {
+        return i
+      }
+    }
+  }
+
+  // holds data from search input field
   this.query = ko.observable('');
 
+  // filters loc_list by query, returns items that match
   this.filterLocs = ko.computed(function () {
     var search = self.query().toLowerCase();
     return ko.utils.arrayFilter(self.loc_list(), function (loc) {
@@ -143,34 +156,9 @@ var ViewModel = function() {
     });
   });
 
+  // updates the map pins every time filterLocs changes due to query change
   this.filterLocs.subscribe(function() {
     deleteMarkers();
     updateLocs();
   });
-};
-
-ko.bindingHandlers.mapMarker = {
-  init: function(element, valueAccessor, allBindings) {
-    // var
-    //   value = valueAccessor();
-    //   map = map;
-    //   name = value.name()
-    //   latLng = new google.maps.LatLng(value.latitude(), value.longitude());
-    //   addMarker(latLng, name);
-  },
-  update: function(element, valueAccessor, allBindings) {
-    value = valueAccessor();
-    console.log('one updated')
-    if (value.name()) {
-    latLng = new google.maps.LatLng(value.latitude(), value.longitude());
-    addMarker(latLng);
-    // marker.setPosition(latLng);
-  } else {
-    console.log('item removed')
-    marker.setMap(null);
-  }
-  for (i = 0; i < markers.length; i++) {
-    markers[i].addListener('click', makeBounce(markers[i]))
-  }
-  },
 };
