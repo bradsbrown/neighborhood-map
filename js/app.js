@@ -143,82 +143,34 @@ var ViewModel = function() {
     });
   });
 
-
-  function initMap() {
-    map = new google.maps.Map(document.getElementById('map'), {
-      center: {lat: 30.5356595, lng: -97.6264142},
-      zoom: 14
-    })};
-
-  // Adds a marker to the map and push to the array.
-  function addMarker(location) {
-    var marker = new google.maps.Marker({
-      position: location,
-      map: map
-    });
-    markers().push(marker);
-  };
-
-  // Sets the map on all markers in the array.
-  function setMapOnAll(map) {
-    for (var i = 0; i < markers.length; i++) {
-      markers[i].setMap(map);
-    }
-  };
-
-  // Removes the markers from the map, but keeps them in the array.
-  function clearMarkers() {
-    setMapOnAll(null);
-  };
-
-  // Shows any markers currently in the array.
-  function showMarkers() {
-    setMapOnAll(map);
-  };
-
-  // Deletes all markers in the array by removing references to them.
-  function deleteMarkers() {
-    clearMarkers();
-    markers = [];
-  }
-
-  // this.filterLocs().forEach(function(loc) {
-  //   var
-  //     ll = new google.maps.LatLng(loc.lat(), loc.lng());
-  //     title = loc.name()
-  //     marker = new google.maps.Marker({
-  //       position: ll,
-  //       map: map,
-  //       title: title,
-  //       animation: google.maps.Animation.DROP
-  //   });
-  //   markers().push(marker);
-  // });
+  this.filterLocs.subscribe(function() {
+    deleteMarkers();
+    updateLocs();
+  });
 };
 
 ko.bindingHandlers.mapMarker = {
   init: function(element, valueAccessor, allBindings) {
-    var
-      value = valueAccessor();
-      map = map;
-      name = value.name()
-      latLng = new google.maps.LatLng(value.latitude(), value.longitude());
-      marker = new google.maps.Marker({
-        position: latLng,
-        map: map,
-        title: name,
-        animation: google.maps.Animation.DROP
-    });
-    marker.addListener('click', toggleBounce);
+    // var
+    //   value = valueAccessor();
+    //   map = map;
+    //   name = value.name()
+    //   latLng = new google.maps.LatLng(value.latitude(), value.longitude());
+    //   addMarker(latLng, name);
   },
   update: function(element, valueAccessor, allBindings) {
     value = valueAccessor();
+    console.log('one updated')
     if (value.name()) {
     latLng = new google.maps.LatLng(value.latitude(), value.longitude());
-    marker.setPosition(latLng);
+    addMarker(latLng);
+    // marker.setPosition(latLng);
   } else {
     console.log('item removed')
     marker.setMap(null);
+  }
+  for (i = 0; i < markers.length; i++) {
+    markers[i].addListener('click', makeBounce(markers[i]))
   }
   },
 };
