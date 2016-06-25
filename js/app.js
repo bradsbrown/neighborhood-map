@@ -133,9 +133,14 @@ var ViewModel = function() {
 
   // on click on sidebar element, changes currentLoc and bounces map pin
   this.changeLoc = function(clickedLoc) {
-    self.currentLoc(clickedLoc);
-    makeBounce(filterIndex(clickedLoc.name()));
+      self.currentLoc(clickedLoc);
+      makeBounce(filterIndex(clickedLoc.name()));
   };
+
+  this.markerChangeLoc = function(index) {
+    loc = filterLocs()[index];
+    self.changeLoc(loc);
+  }
 
   function filterIndex(name) {
     for (i = 0; i < filterLocs().length; i++ ) {
@@ -156,7 +161,7 @@ var ViewModel = function() {
     });
   });
 
-  // updates the map pins every time filterLocs changes due to query change
+  // clears and re-drops the map pins every time filterLocs changes
   this.filterLocs.subscribe(function() {
     deleteMarkers();
     updateLocs();

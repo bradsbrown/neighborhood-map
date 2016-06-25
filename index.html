@@ -54,6 +54,9 @@
         zoom: 14
       });
       ko.applyBindings(ViewModel);
+      setTimeout( function() {
+        updateLocs();
+      }, 1500);
     };
 
     // Adds a marker to the map and push to the array.
@@ -67,6 +70,7 @@
       markers.push(marker);
     }
 
+    // takes all filterLocs and pushes pins to the map
     function updateLocs() {
       for (i = 0; i < self.filterLocs().length; i++) {
         var
@@ -74,6 +78,12 @@
           name = self.filterLocs()[i].name()
         addMarker(ll, name);
       };
+      setTimeout( function() {
+        for (i = 0; i < markers.length; i++) {
+        google.maps.event.addListener(markers[i], 'click', function() {
+          markerChangeLoc(markers.indexOf(this));
+        })
+      }}, 1500);
     }
 
 
@@ -115,5 +125,4 @@
   <script src="js/knockout-3.4.0.js"></script>
   <script src="js/app.js"></script>
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC0lYW2HP4ddQ1jaO_7JlJ0B_CdOp_On6o&callback=initMap"></script>
-
 </html>
