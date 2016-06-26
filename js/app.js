@@ -73,7 +73,14 @@ var Location = function(data) {
   this.lat = ko.observable(data.lat);
   this.lng = ko.observable(data.lng);
   this.shorturl = ko.observable(data.shorturl);
-  this.description = ko.observable(data.description);
+  this.desc = ko.observable(data.description);
+  this.description = ko.computed(function() {
+    if (locself.desc() === undefined) {
+      return "No description provided."
+    } else {
+      return locself.desc()
+    }
+  });
   this.formattedName = ko.computed(function() {
     return (loc_list.indexOf(locself) + 1) + " - " + locself.name() + " - " + locself.rating()
   });
@@ -98,7 +105,7 @@ var Location = function(data) {
       locself.lat(data.location.lat);
       locself.lng(data.location.lng);
       locself.shorturl(data.shortUrl);
-      locself.description(data.description);
+      locself.desc(data.description);
     })
     .fail(function( xhr, status, errorThrown ) {
       alert( "Sorry, there was a problem!" );

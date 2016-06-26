@@ -5,7 +5,8 @@
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     <link rel="stylesheet" type="text/css" href="css/bootstrap.css">
     <link rel="stylesheet" type="text/css" href="css/simple-sidebar.css">
-    <link rel="stylesheet" type="text/css" href="css/style.css">
+    <link rel="stylesheet" type="text/css" media="screen and (min-width: 760px)" href="css/style.css">
+    <link rel="stylesheet" type="text/css" media="screen and (max-width:759px)" href="css/style-mobile.css">
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
     <script src="js/bootstrap.min.js"></script>
     <title>Neigbhorhood Map</title>
@@ -41,7 +42,7 @@
         </div>
       </div>
     </div>
-    <div class="container fill">
+    <div class="container fill" id="mapWrapper">
       <div id="map">
       </div>
     </div>
@@ -114,6 +115,11 @@
       marker.setAnimation(google.maps.Animation.BOUNCE);
       setTimeout(function(){ marker.setAnimation(null); }, 750);
     }
+
+    function googleError() {
+      console.log("googleError called")
+      document.getElementById("map").style.backgroundImage = "url('static/noLoad.png')";
+    }
     </script>
     <script>
       $("#menu-toggle").click(function(e) {
@@ -124,5 +130,5 @@
   </body>
   <script src="js/knockout-3.4.0.js"></script>
   <script src="js/app.js"></script>
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC0lYW2HP4ddQ1jaO_7JlJ0B_CdOp_On6o&callback=initMap"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC0lYW2HP4ddQ1jaO_7JlJ0B_CdOp_On6o&callback=initMap" onerror="googleError()" async defer></script>
 </html>
